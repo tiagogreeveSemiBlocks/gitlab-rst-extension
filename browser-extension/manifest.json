@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "GitLab RST Enhanced",
+  "version": "1.0.0",
+  "description": "Full reStructuredText rendering and styling in the GitLab UI (self-managed and GitLab.com).",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["styles.css"], "matches": ["<all_urls>"] }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  }
+}

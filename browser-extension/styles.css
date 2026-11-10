@@ -1,0 +1,100 @@
+/*
+ * rst-enhanced.css
+ * Styling for docutils output rendered by GitLab (server- or client-injected).
+ * Docutils emits semantic classes (admonition warning, table, sidebar, ...)
+ * which GitLab keeps through sanitization but never styles.
+ */
+
+.rst-enhanced { line-height: 1.6; }
+.rst-enhanced h1 { font-size: 1.75em; margin: 1.2em 0 .5em; }
+.rst-enhanced h2 { font-size: 1.4em; margin: 1.1em 0 .4em; }
+.rst-enhanced h3 { font-size: 1.2em; margin: 1em 0 .4em; }
+
+/* ---------- admonitions ---------- */
+.rst-enhanced .admonition {
+  border: 1px solid #d0d7de;
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: .75rem 1rem;
+  margin: 1rem 0;
+  background: #f6f8fa;
+}
+.rst-enhanced .admonition > .admonition-title {
+  font-weight: 600;
+  margin: 0 0 .4rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.rst-enhanced .admonition.attention,
+.rst-enhanced .admonition.caution { border-left-color: #bf8700; background: #fff8c5; }
+.rst-enhanced .admonition.attention > .admonition-title,
+.rst-enhanced .admonition.caution > .admonition-title { color: #7d4e00; }
+.rst-enhanced .admonition.danger,
+.rst-enhanced .admonition.error { border-left-color: #cf222e; background: #ffebe9; }
+.rst-enhanced .admonition.danger > .admonition-title,
+.rst-enhanced .admonition.error > .admonition-title { color: #a40e26; }
+.rst-enhanced .admonition.warning { border-left-color: #d4a72c; background: #fff3cd; }
+.rst-enhanced .admonition.warning > .admonition-title { color: #7d4e00; }
+.rst-enhanced .admonition.hint,
+.rst-enhanced .admonition.tip { border-left-color: #1f883d; background: #dafbe1; }
+.rst-enhanced .admonition.hint > .admonition-title,
+.rst-enhanced .admonition.tip > .admonition-title { color: #116329; }
+.rst-enhanced .admonition.important { border-left-color: #0969da; background: #ddf4ff; }
+.rst-enhanced .admonition.important > .admonition-title { color: #0550ae; }
+.rst-enhanced .admonition.note { border-left-color: #8250df; background: #fbefff; }
+.rst-enhanced .admonition.note > .admonition-title { color: #8250df; }
+
+/* ---------- tables ---------- */
+.rst-enhanced table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+.rst-enhanced table.docutils { border: 1px solid #d0d7de; }
+.rst-enhanced th, .rst-enhanced td {
+  border: 1px solid #d0d7de;
+  padding: .4rem .7rem;
+  text-align: left;
+  vertical-align: top;
+}
+.rst-enhanced thead th { background: #f6f8fa; font-weight: 600; }
+.rst-enhanced tbody tr:nth-child(even) { background: #fbfcfd; }
+
+/* ---------- literal blocks / code ---------- */
+.rst-enhanced pre.literal-block,
+.rst-enhanced pre.code {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: .8rem 1rem;
+  overflow-x: auto;
+  font-size: .9em;
+}
+.rst-enhanced code,
+.rst-enhanced .literal { background: #f6f8fa; padding: .1em .35em; border-radius: 4px; }
+
+/* ---------- structural elements ---------- */
+.rst-enhanced .sidebar {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: .75rem 1rem;
+  margin: 1rem 0;
+}
+.rst-enhanced .sidebar-title { font-weight: 600; font-style: italic; }
+.rst-enhanced .topic { margin: 1rem 0; padding-left: 1rem; border-left: 3px solid #d0d7de; }
+.rst-enhanced .rubric { font-weight: 600; color: #57606f; margin: 1.2rem 0 .4rem; }
+.rst-enhanced .field-list { border-left: 3px solid #d0d7de; padding-left: .75rem; margin: 1rem 0; }
+.rst-enhanced .field-name { font-weight: 600; white-space: nowrap; }
+.rst-enhanced .option-list { font-family: monospace; }
+.rst-enhanced .option-list kbd { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 0 .3em; }
+.rst-enhanced hr { border: 0; border-top: 1px solid #d0d7de; margin: 1.5rem 0; }
+.rst-enhanced blockquote { border-left: 3px solid #d0d7de; margin: 1rem 0; padding: 0 1rem; color: #57606f; }
+.rst-enhanced .footnote, .rst-enhanced .citation { font-size: .9em; color: #57606f; }
+.rst-enhanced .toc { border: 1px solid #d0d7de; border-radius: 6px; padding: .75rem 1rem; background: #f6f8fa; margin: 1rem 0; }
+.rst-enhanced .contents.topic > .topic-title { font-weight: 600; }
+.rst-enhanced img { max-width: 100%; }

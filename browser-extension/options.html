@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 2rem auto; padding: 0 1rem; }
+    input { width: 100%; padding: 6px; margin: 8px 0 16px; }
+    .muted { color: #57606f; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>GitLab RST Enhanced</h1>
+  <label>
+    <input type="checkbox" id="enabled"> Enable RST enhancement
+    <span class="muted">(also disabled per-site below)</span>
+  </label>
+  <p>GitLab hosts to enhance (one per line, hostname only):</p>
+  <textarea id="hosts" rows="6" cols="40"></textarea>
+  <br>
+  <button id="save">Save</button>
+  <span id="status" class="muted"></span>
+  <script src="options.js"></script>\n</body>
+</html>

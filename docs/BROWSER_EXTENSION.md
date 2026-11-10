@@ -47,10 +47,41 @@ On a GitLab page, DevTools console:
 ```js
 document.body.classList.contains("rst-enhanced-page") // true
 document.getElementById("gitlab-rst-enhanced-style")   // <style>
-````
+```
 
 If the style tag is missing, the most likely cause is ungranted host
 permissions (step 2), not the detection heuristic.
+
+### 5. Firefox Flatpak: load from a sandbox-readable path
+
+If Firefox is installed as a **Flatpak**, it runs in a filesystem
+sandbox. A temporary add-on can be *loaded* from any directory (the
+file chooser bypasses the sandbox), but Firefox then fails to read the
+extension's own files. Symptoms: blank toolbar icon, blank options
+page, popup does nothing, and the content script never runs - while
+`ls` on the host shows all files present.
+
+Diagnosis: open the icon directly in a tab:
+
+```
+file:///<repo-path>/browser-extension/icons/icon.svg
+```
+
+If Firefox shows "file not found" while the file exists on disk, the
+sandbox cannot read that directory.
+
+Fix: expose the repo path to Firefox, fully restart it, and re-load the
+add-on:
+
+```bash
+flatpak override --user --filesystem=/<repo-path> org.mozilla.firefox
+flatpak kill org.mozilla.firefox   # fully quit, then relaunch
+```
+
+Undo with `flatpak override --user --reset org.mozilla.firefox`.
+Alternatively, copy `browser-extension/` to a location the sandbox
+already exposes (e.g. `~/.local/share/gitlab-rst-extension`) and load
+that copy, or use a native (deb/rpm) Firefox for extension development.
 
 ## Chrome / Edge
 

@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
   "name": "GitLab RST Enhanced",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Full reStructuredText rendering and styling in the GitLab UI (self-managed and GitLab.com).",
-  "permissions": ["storage"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "gitlab-rst-enhanced@tiagogreeve"
+    }
+  },
+  "permissions": ["storage", "tabs", "activeTab"],
   "host_permissions": ["<all_urls>"],
   "content_scripts": [
     {

@@ -1,14 +1,19 @@
-// GitLab RST Enhanced - background (Firefox MV3 event page).
+// GitLab RST Enhanced - background (Firefox event page).
 //
-// On Firefox MV3, if default_popup fails to attach (known flakiness with
-// temporary add-ons and on some versions), this fallback opens the
-// options page when the toolbar icon is clicked. If a popup IS attached,
-// Firefox never fires action.onClicked, so this is harmless.
+// Robust icon-click fallback: Firefox MV3 uses "action" since version
+// 121 and "browser_action" before that. Register the open-options
+// listener on whichever exists. If a default_popup attaches, the
+// onClicked event never fires, so this is harmless on every version.
 
 const api = typeof browser !== "undefined" ? browser : chrome;
 
+function openSettings() {
+  api.runtime.openOptionsPage();
+}
+
 if (api.action && api.action.onClicked) {
-  api.action.onClicked.addListener(function () {
-    api.runtime.openOptionsPage();
-  });
+  api.action.onClicked.addListener(openSettings);
+}
+if (api.browserAction && api.browserAction.onClicked) {
+  api.browserAction.onClicked.addListener(openSettings);
 }

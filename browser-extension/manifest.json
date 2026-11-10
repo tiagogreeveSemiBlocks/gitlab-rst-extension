@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitLab RST Enhanced",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Full reStructuredText rendering and styling in the GitLab UI (self-managed and GitLab.com).",
   "browser_specific_settings": {
     "gecko": {
@@ -25,6 +25,14 @@
     { "resources": ["styles.css"], "matches": ["<all_urls>"] }
   ],
   "action": {
+    "default_title": "GitLab RST Enhanced - click for settings",
+    "default_icon": {
+      "48": "icons/icon.svg",
+      "96": "icons/icon.svg"
+    },
+    "default_popup": "popup.html"
+  },
+  "browser_action": {
     "default_title": "GitLab RST Enhanced - click for settings",
     "default_icon": {
       "48": "icons/icon.svg",

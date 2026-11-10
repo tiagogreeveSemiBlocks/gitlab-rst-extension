@@ -3,30 +3,44 @@
 Chrome/Edge (MV3, load unpacked) and Firefox (temporary add-on, or signed
 with web-ext).
 
+## Icons
+
+`icons/icon.svg` is the extension icon (GitLab-orange document with an
+RST badge). Firefox supports SVG icons directly; Chrome accepts SVG in
+recent versions. Before publishing to the Chrome Web Store or AMO, export
+PNG copies (16/48/128 px) and update the `icons` entries.
+
 ## Firefox
 
 ### 1. Load the extension
 
 - Temporary: `about:debugging#/runtime/this-firefox` -> **Load Temporary
   Add-on** -> `browser-extension/manifest.json`.
-- Or permanent dev install: `web-ext run --source-dir browser-extension`.
+- Or: `web-ext run --source-dir browser-extension`.
 
-Temporary add-ons vanish when Firefox restarts.
+Temporary add-ons vanish when Firefox restarts and NEVER auto-update:
+after pulling new code you must **Remove** the old entry and **Reload**
+the add-on (about:debugging), or re-load the manifest.
 
 ### 2. Grant host permissions (required!)
 
 Firefox treats MV3 `host_permissions` as **optional**: the content
-script is never injected until access is granted. Two ways:
+script never runs until access is granted.
 
-- Click the extension icon -> **Grant access to all sites** (calls
-  `browser.permissions.request`), then reload open GitLab tabs.
-- Or `about:addons` -> GitLab RST Enhanced -> **Permissions** tab ->
-  enable **Access your data for all websites**.
+- Click the toolbar icon -> **Grant access to all sites**, then reload
+  open GitLab tabs; or
+- `about:addons` -> GitLab RST Enhanced -> **Permissions** -> enable
+  **Access your data for all websites**.
 
-Chrome grants host permissions automatically on install; this step is
-Firefox-only.
+### 3. Opening settings
 
-### 3. Verify
+Click the toolbar icon: a small popup opens with a global toggle and
+per-site buttons. On Firefox versions where the popup does not attach
+(a known MV3 flakiness), clicking the icon instead opens the full
+options page (background fallback). You can always reach it via
+`about:addons` -> GitLab RST Enhanced -> Options.
+
+### 4. Verify
 
 On a GitLab page, DevTools console:
 
@@ -43,6 +57,8 @@ permissions (step 2), not the detection heuristic.
 1. Open `chrome://extensions/` (or `edge://extensions/`).
 2. Enable **Developer mode**.
 3. Click **Load unpacked** and select `browser-extension/`.
+4. After pulling updates, click the extension's **Reload** (circular
+   arrows) icon on the chrome://extensions card.
 
 ## What it does
 
@@ -54,15 +70,3 @@ permissions (step 2), not the detection heuristic.
 - Tags `.rst` blob viewers with the `rst-enhanced` class.
 - Re-runs on GitLab's soft (Turbo-style) navigations and immediately
   when settings change.
-
-## Configuration
-
-- Popup: global on/off toggle, per-site enable/disable for the current
-  tab's host, and the Firefox permission grant button.
-- Options page (right-click the extension icon -> Options): manage the
-  full allow-list of GitLab hosts, one per line.
-
-## Icons
-
-Add PNG icons (16/48/128) and reference them under `icons` in
-`manifest.json` before publishing to the Chrome Web Store or AMO.

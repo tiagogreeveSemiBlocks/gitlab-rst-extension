@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitLab RST Enhanced",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Full reStructuredText rendering and styling in the GitLab UI (self-managed and GitLab.com).",
   "browser_specific_settings": {
     "gecko": {

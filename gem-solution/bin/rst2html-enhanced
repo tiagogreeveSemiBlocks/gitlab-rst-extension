@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Enhanced reStructuredText renderer for GitLab.
+
+Drop-in replacement for the docutils invocation used by the gitlab-markup
+gem. Reads RST on stdin and writes an HTML fragment to stdout, so it can
+be wired into GitLab's server-side markup pipeline.
+
+Security model (mirrors GitLab's own restrictions):
+  - the 'raw' directive is disabled (no arbitrary HTML injection)
+  - the 'include' directive is disabled (no reading server files)
+  - system messages / warnings are never emitted into the HTML output
+"""
+
+import argparse
+import os
+import sys
+
+DEFAULT_CSS_PATHS = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "rst-enhanced.css"),
+    "/usr/local/share/gitlab-rst-enhanced/rst-enhanced.css",
+]
+
+
+def disable_unsafe_directives():
+    """Neutralize directives that can read files or inject raw HTML."""
+    from docutils.parsers import rst
+    from docutils.parsers.rst import Directive
+
+    class Disabled(Directive):
+        has_content = True
+        optional_arguments = 100
+
+        def run(self):
+            raise self.error(
+                "The '%s' directive is disabled in GitLab" % self.name
+            )
+
+    for name in ("raw", "include"):
+        try:
+            rst.directives.register_directive(name, Disabled)
+        except Exception:
+            pass
+
+
+def render(text, full_page=False, css=None):
+    from docutils.core import publish_parts
+
+    settings = {
+        "halt_level": 3,        # never write system messages into output
+        "report_level": 5,
+        "warning_stream": sys.stderr,
+        "input_encoding": "utf-8",
+        "output_encoding": "unicode",
+    }
+
+    try:
+        writer = "html5"
+        parts = publish_parts(source=text, writer_name=writer, settings_overrides=settings)
+    except ImportError:
+        writer = "html"
+        parts = publish_parts(source=text, writer_name=writer, settings_overrides=settings)
+
+    body = parts.get("body") or parts.get("fragment") or ""
+
+    if not full_page:
+        return '<div class="rst-enhanced">\n' + body + "\n</div>"
+
+    css_text = css or ""
+    if not css_text:
+        for path in DEFAULT_CSS_PATHS:
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as fh:
+                    css_text = fh.read()
+                break
+    return (
+        "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        "<title>RST preview</title><style>"
+        "body{max-width:920px;margin:2rem auto;padding:0 1rem;font-family:sans-serif}"
+        + css_text +
+        "</style></head><body class='rst-enhanced'>"
+        + body + "</body></html>"
+    )
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Enhanced RST renderer for GitLab")
+    parser.add_argument("--full-page", action="store_true",
+                        help="emit a standalone HTML document (local preview)")
+    parser.add_argument("--css", default=None,
+                        help="CSS text to embed into a full page")
+    args = parser.parse_args()
+
+    disable_unsafe_directives()
+    text = sys.stdin.read()
+    try:
+        sys.stdout.write(render(text, full_page=args.full_page or args.css is not None, css=args.css))
+    except Exception as exc:  # docutils raises its own exception types
+        sys.stderr.write("rst2html-enhanced: %s\n" % exc)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

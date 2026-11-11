@@ -7,10 +7,21 @@ GitLab UI, with styled admonitions, tables, sidebars, code blocks and more.
 
 GitLab renders `.rst` blobs by spawning a `python3` docutils process from
 the gitlab-markup gem. If `python3` + docutils are missing on the host, RST
-files fall back to plain text. Docutils emits semantic CSS classes
-(`admonition warning`, `table`, `sidebar`, ...), and GitLab's sanitizer
-keeps them, but GitLab ships no CSS for them - which is why RST looks
-unstyled. This project fixes both sides.
+files fall back to plain text.
+
+Two things then break full RST rendering:
+
+1. **Sanitization**: Banzai's SanitizationFilter UNWRAPS `<div>` elements.
+   Docutils emits admonitions, sidebars, topics and rubrics as divs with
+   semantic classes - the sanitizer removes the divs and their classes,
+   so they collapse into plain paragraphs. This is why a rendered RST
+   blob shows real tables but unstyled "Be careful." text under warnings.
+2. **Styling**: even where elements survive, GitLab ships no CSS for
+   docutils' classes.
+
+This project fixes both: the initializer extends the sanitization
+allowlist (divs and classes survive) and the RST stylesheet is injected
+(they get styled).
 
 ## 1. Quick start (script)
 
@@ -24,7 +35,8 @@ The script:
 2. Copies the enhanced renderer to `/usr/local/lib/gitlab-rst-enhanced`.
 3. Drops a Rails initializer into
    `/opt/gitlab/embedded/service/gitlab-rails/config/initializers/` that
-   wraps `gitlab-markup`'s `.rst` rendering.
+   wraps `gitlab-markup`'s `.rst` rendering AND extends the Banzai
+   sanitization allowlist.
 4. Restarts `gitlab-rails`.
 
 Re-run the script after every GitLab upgrade (Omnibus restores its
@@ -38,6 +50,11 @@ content)`. The initializer wraps it: `.rst` files go through
 other markup language falls through untouched. Because it patches the
 public API, it survives gitlab-markup internal changes.
 
+The initializer also registers
+`Banzai::Filter::SanitizationFilter.custom_allowlist`, adding `div`,
+`aside`, `figure`, `figcaption` and the `class` attribute to the
+allowlist, so docutils' structural markup survives sanitization.
+
 ## 3. Security
 
 The enhanced renderer keeps GitLab's restrictions:
@@ -45,12 +62,17 @@ The enhanced renderer keeps GitLab's restrictions:
 - The `raw` directive is disabled (no arbitrary HTML injection).
 - The `include` directive is disabled (no reading host files).
 - Warnings/system messages are never written into the HTML.
-- Output passes through GitLab's normal Banzai sanitization.
+- All other elements still pass through Banzai sanitization unchanged.
+
+Note: allowing `div`/`aside` with `class` widens what rendered RST can
+contain structurally; the enhanced renderer itself never emits scripts,
+event handlers or inline styles, and `raw` remains disabled, so no
+untrusted HTML enters the pipeline through RST.
 
 ## 4. Styling: inject the RST stylesheet
 
-Docutils classes survive sanitization, so the only missing piece is CSS.
-Two options:
+With the allowlist extended, docutils classes survive to the browser.
+The remaining piece is CSS. Two options:
 
 **Option A - NGINX sub_filter (recommended, no Rails patching).** In
 `/etc/gitlab/gitlab.rb`:
@@ -69,14 +91,28 @@ Then `sudo gitlab-ctl reconfigure`.
 the exact same stylesheet client-side. Use it if you cannot touch NGINX,
 or on GitLab.com.
 
-## 5. Verify
+## 5. Why the browser extension alone is not enough
+
+The extension can only style what reaches the browser. Before the
+initializer is installed, GitLab's sanitizer has already unwrapped the
+admonition/sidebar divs server-side, so there is nothing left for client
+CSS to target. Full RST rendering (structure + styling) requires the
+server-side component; the extension complements it by injecting the
+stylesheet without NGINX changes and by covering additional surfaces.
+
+## 6. Verify
 
 Push `test-sample/README.rst` to a project. You should see: colored
 admonitions, bordered striped tables, boxed literal blocks, a styled
-sidebar/topic/field list. If the structure is right but unstyled, only
-step 4 is missing.
+sidebar/topic/field list.
 
-## 6. Scope and limits
+If admonitions still render as plain paragraphs: the initializer did not
+load - check `sudo gitlab-ctl tail gitlab-rails` for the
+"[rst-enhanced]" log lines after restart.
+If the structure is right but uncolored: only the stylesheet (step 4) is
+missing.
+
+## 7. Scope and limits
 
 Fully server-side rendered surfaces: repository `.rst` files, README.rst,
 index.rst, and any markup-rendered blob.
@@ -88,7 +124,7 @@ patching GitLab core. The companion browser extension covers those
 surfaces client-side (styled blocks), or contributors can write Markdown
 with fenced RST kept in `.rst` files. See docs/LIMITATIONS.md.
 
-## 7. Uninstall
+## 8. Uninstall
 
 ```bash
 sudo rm /opt/gitlab/embedded/service/gitlab-rails/config/initializers/rst_enhanced.rb
